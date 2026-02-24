@@ -1,29 +1,32 @@
 package com.flexpos.pos_dashboard_api.config.security;
 
-import com.flexpos.pos_dashboard_api.modules.auth.entity.Role;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.flexpos.pos_dashboard_api.modules.auth.entity.User;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
-    private final String SECRET = "very-secret-key-very-secret-key";
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration}")
+    private long expiration;
 
     public String generateToken(User user) {
-        return Jwts.builder()
-                .setSubject(user.getId().toString())
-                .claim("username", user.getUsername())
-                .claim("roles", user.getRoles()
-                        .stream()
-                        .map(Role::getName)
-                        .toList())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
-                .signWith(Keys.hmacShaKeyFor(SECRET.getBytes()), SignatureAlgorithm.HS256)
-                .compact();
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+
+        return JWT.create()
+                .withSubject(user.getId().toString())
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
+                .sign(algorithm);
     }
 }

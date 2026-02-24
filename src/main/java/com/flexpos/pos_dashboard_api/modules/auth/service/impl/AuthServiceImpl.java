@@ -1,5 +1,6 @@
 package com.flexpos.pos_dashboard_api.modules.auth.service.impl;
 
+import com.flexpos.pos_dashboard_api.common.exception.InvariantException;
 import com.flexpos.pos_dashboard_api.config.security.JwtService;
 import com.flexpos.pos_dashboard_api.modules.auth.dto.request.RegisterRequest;
 import com.flexpos.pos_dashboard_api.modules.auth.dto.response.RegisterLoginResponse;
@@ -29,19 +30,19 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public RegisterLoginResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already registered");
+            throw new InvariantException("Email already registered");
         }
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already registered");
+            throw new InvariantException("Username already registered");
         }
 
         if (userRepository.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
-            throw new RuntimeException("Phone number already registered");
+            throw new InvariantException("Phone number already registered");
         }
 
         Role defaultRole = roleRepository.findByName("OWNER")
-                .orElseThrow(() -> new RuntimeException("Default role not found"));
+                .orElseThrow(() -> new InvariantException("Default role not found"));
 
         User user = User.builder()
                 .username(request.getUsername())
@@ -53,9 +54,9 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         user.getRoles().add(defaultRole);
-        userRepository.save(user);
 
-        String token = jwtService.generateToken(user);
+        User savedUser = userRepository.save(user);
+        String token = jwtService.generateToken(savedUser);
 
         return RegisterLoginResponse.builder()
                 .accessToken(token)
