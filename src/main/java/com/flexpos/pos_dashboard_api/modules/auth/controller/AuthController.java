@@ -1,5 +1,6 @@
 package com.flexpos.pos_dashboard_api.modules.auth.controller;
 
+import com.flexpos.pos_dashboard_api.modules.auth.dto.request.LoginRequest;
 import com.flexpos.pos_dashboard_api.modules.auth.dto.request.RegisterRequest;
 import com.flexpos.pos_dashboard_api.modules.auth.dto.response.RegisterLoginResponse;
 import com.flexpos.pos_dashboard_api.modules.auth.service.AuthService;
@@ -25,5 +26,11 @@ public class AuthController {
     public ResponseEntity<RegisterLoginResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterLoginResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<RegisterLoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        RegisterLoginResponse response = authService.login(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

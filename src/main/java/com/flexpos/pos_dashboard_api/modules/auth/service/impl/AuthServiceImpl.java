@@ -2,6 +2,7 @@ package com.flexpos.pos_dashboard_api.modules.auth.service.impl;
 
 import com.flexpos.pos_dashboard_api.common.exception.InvariantException;
 import com.flexpos.pos_dashboard_api.config.security.JwtService;
+import com.flexpos.pos_dashboard_api.modules.auth.dto.request.LoginRequest;
 import com.flexpos.pos_dashboard_api.modules.auth.dto.request.RegisterRequest;
 import com.flexpos.pos_dashboard_api.modules.auth.dto.response.RegisterLoginResponse;
 import com.flexpos.pos_dashboard_api.modules.auth.entity.Role;
@@ -29,12 +30,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public RegisterLoginResponse register(RegisterRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new InvariantException("Email already registered");
-        }
-
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new InvariantException("Username already registered");
+        }
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new InvariantException("Email already registered");
         }
 
         if (userRepository.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
@@ -57,6 +58,25 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
         String token = jwtService.generateToken(savedUser);
+
+        return RegisterLoginResponse.builder()
+                .accessToken(token)
+                .user(authMapper.toUserResponse(user))
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public RegisterLoginResponse login(LoginRequest request) {
+        User user = userRepository
+                .findByEmailAndDeletedAtIsNull(request.getEmail())
+                .orElseThrow(() -> new InvariantException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new InvariantException("Invalid credentials");
+        }
+
+        String token = jwtService.generateToken(user);
 
         return RegisterLoginResponse.builder()
                 .accessToken(token)
