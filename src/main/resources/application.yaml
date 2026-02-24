@@ -24,4 +24,5 @@ server:
 
 jwt:
   secret: pos-dashboard-super-secret
-  expiration: 86400000
+  access-token-expiration: 86400000          # 1 hari
+  refresh-token-expiration: 604800000 # 7 hari
