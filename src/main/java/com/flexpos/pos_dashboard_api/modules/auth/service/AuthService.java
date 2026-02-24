@@ -5,6 +5,7 @@ import com.flexpos.pos_dashboard_api.modules.auth.dto.request.RegisterRequest;
 import com.flexpos.pos_dashboard_api.modules.auth.dto.response.RegisterLoginResponse;
 
 public interface AuthService {
-    RegisterLoginResponse register(RegisterRequest request);
-    RegisterLoginResponse login(LoginRequest request);
+  RegisterLoginResponse register(RegisterRequest request);
+
+  RegisterLoginResponse login(LoginRequest request);
 }
