@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/pos_dashboard_db
-    username: postgres
-    password: sandy207
+    username: pos_dashboard_user
+    password: password123
 
   jpa:
     hibernate:
@@ -25,4 +25,4 @@ server:
 jwt:
   secret: pos-dashboard-super-secret
   access-token-expiration: 86400000          # 1 hari
-  refresh-token-expiration: 604800000 # 7 hari
+  refresh-token-expiration: 604800000        # 7 hari
