@@ -20,7 +20,7 @@ spring:
     locations: classpath:db/migration
 
 server:
-  port: 8080
+  port: 8000
 
 jwt:
   secret: pos-dashboard-super-secret
