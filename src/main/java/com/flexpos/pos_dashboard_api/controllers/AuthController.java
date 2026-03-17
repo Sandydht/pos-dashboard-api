@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.flexpos.pos_dashboard_api.models.auth.AuthResponse;
+import com.flexpos.pos_dashboard_api.models.auth.LoginUserRequest;
 import com.flexpos.pos_dashboard_api.models.auth.RegisterUserRequest;
 import com.flexpos.pos_dashboard_api.models.common.WebResponse;
 import com.flexpos.pos_dashboard_api.services.AuthService;
@@ -24,6 +25,14 @@ public class AuthController {
   @PostMapping("/register")
   public ResponseEntity<WebResponse<AuthResponse>> registerUser(@RequestBody RegisterUserRequest request) {
     WebResponse<AuthResponse> response = authService.registerUser(request);
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(response);
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<WebResponse<AuthResponse>> loginUser(@RequestBody LoginUserRequest request) {
+    WebResponse<AuthResponse> response = authService.loginUser(request);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(response);

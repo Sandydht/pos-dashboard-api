@@ -12,6 +12,7 @@ import com.flexpos.pos_dashboard_api.entities.RefreshTokenEntity;
 import com.flexpos.pos_dashboard_api.entities.UserEntity;
 import com.flexpos.pos_dashboard_api.exceptions.InvariantException;
 import com.flexpos.pos_dashboard_api.models.auth.AuthResponse;
+import com.flexpos.pos_dashboard_api.models.auth.LoginUserRequest;
 import com.flexpos.pos_dashboard_api.models.auth.RegisterUserRequest;
 import com.flexpos.pos_dashboard_api.models.common.WebResponse;
 import com.flexpos.pos_dashboard_api.repositories.AuthRepository;
@@ -77,7 +78,41 @@ public class AuthServiceImplementation implements AuthService {
 
     return WebResponse
         .<AuthResponse>builder()
-        .status("OK")
+        .status("CREATED")
+        .data(authResponse)
+        .build();
+  }
+
+  @Transactional
+  public WebResponse<AuthResponse> loginUser(LoginUserRequest request) {
+    ValidationUtil.validate(validator, request);
+
+    UserEntity user = userRepository
+        .findByEmail(request.getEmail())
+        .orElseThrow(() -> new InvariantException("The credentials you entered are incorrect"));
+
+    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+      throw new InvariantException("Invalid credentials");
+    }
+
+    String accessToken = jwtServiceImplementation.generateAccessToken(user.getId().toString());
+    String refreshToken = jwtServiceImplementation.generateRefreshToken(user.getId().toString());
+    Instant refreshTokenExpiresAt = Instant.now().plusMillis(refreshTokenExpiration);
+
+    RefreshTokenEntity refreshTokenEntity = new RefreshTokenEntity();
+    refreshTokenEntity.setToken(refreshToken);
+    refreshTokenEntity.setExpiresAt(refreshTokenExpiresAt);
+    refreshTokenEntity.setUser(user);
+    authRepository.save(refreshTokenEntity);
+
+    AuthResponse authResponse = AuthResponse
+        .builder()
+        .accessToken(accessToken)
+        .build();
+
+    return WebResponse
+        .<AuthResponse>builder()
+        .status("CREATED")
         .data(authResponse)
         .build();
   }

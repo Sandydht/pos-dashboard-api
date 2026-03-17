@@ -1,5 +1,7 @@
 package com.flexpos.pos_dashboard_api.repositories;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +15,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
   boolean existsByEmail(String email);
 
   boolean existsByPhoneNumber(String phone_number);
+
+  Optional<UserEntity> findByEmail(String email);
 
 }
