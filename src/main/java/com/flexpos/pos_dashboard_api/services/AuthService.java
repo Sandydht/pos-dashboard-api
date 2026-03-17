@@ -11,4 +11,6 @@ public interface AuthService {
 
   public WebResponse<AuthResponse> loginUser(LoginUserRequest request);
 
+  public WebResponse<String> logoutUser();
+
 }

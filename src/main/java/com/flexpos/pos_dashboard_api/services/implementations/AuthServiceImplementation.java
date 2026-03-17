@@ -2,8 +2,10 @@ package com.flexpos.pos_dashboard_api.services.implementations;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.flexpos.pos_dashboard_api.entities.RefreshTokenEntity;
 import com.flexpos.pos_dashboard_api.entities.UserEntity;
 import com.flexpos.pos_dashboard_api.exceptions.InvariantException;
+import com.flexpos.pos_dashboard_api.exceptions.NotFoundException;
 import com.flexpos.pos_dashboard_api.models.auth.AuthResponse;
 import com.flexpos.pos_dashboard_api.models.auth.LoginUserRequest;
 import com.flexpos.pos_dashboard_api.models.auth.RegisterUserRequest;
@@ -114,6 +117,26 @@ public class AuthServiceImplementation implements AuthService {
         .<AuthResponse>builder()
         .status("CREATED")
         .data(authResponse)
+        .build();
+  }
+
+  @Transactional
+  public WebResponse<String> logoutUser() {
+    UUID userId = (UUID) SecurityContextHolder
+        .getContext()
+        .getAuthentication()
+        .getPrincipal();
+
+    if (!userRepository.existsById(userId)) {
+      throw new NotFoundException("User not found!");
+    } 
+
+    authRepository.deleteByUserId(userId);
+
+    return WebResponse
+        .<String>builder()
+        .status("OK")
+        .data("See you!")
         .build();
   }
 

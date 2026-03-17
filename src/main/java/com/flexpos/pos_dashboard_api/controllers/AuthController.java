@@ -2,6 +2,7 @@ package com.flexpos.pos_dashboard_api.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,14 @@ public class AuthController {
   @PostMapping("/login")
   public ResponseEntity<WebResponse<AuthResponse>> loginUser(@RequestBody LoginUserRequest request) {
     WebResponse<AuthResponse> response = authService.loginUser(request);
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(response);
+  }
+
+  @DeleteMapping("/logout")
+  public ResponseEntity<WebResponse<String>> logoutUser() {
+    WebResponse<String> response = authService.logoutUser();
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(response);
