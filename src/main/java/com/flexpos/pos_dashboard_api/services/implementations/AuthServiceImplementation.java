@@ -2,18 +2,16 @@ package com.flexpos.pos_dashboard_api.services.implementations;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.flexpos.pos_dashboard_api.entities.RefreshTokenEntity;
 import com.flexpos.pos_dashboard_api.entities.UserEntity;
+import com.flexpos.pos_dashboard_api.enums.UserStatus;
 import com.flexpos.pos_dashboard_api.exceptions.InvariantException;
-import com.flexpos.pos_dashboard_api.exceptions.NotFoundException;
 import com.flexpos.pos_dashboard_api.models.auth.AuthResponse;
 import com.flexpos.pos_dashboard_api.models.auth.LoginUserRequest;
 import com.flexpos.pos_dashboard_api.models.auth.RegisterUserRequest;
@@ -21,6 +19,7 @@ import com.flexpos.pos_dashboard_api.models.common.WebResponse;
 import com.flexpos.pos_dashboard_api.repositories.AuthRepository;
 import com.flexpos.pos_dashboard_api.repositories.UserRepository;
 import com.flexpos.pos_dashboard_api.services.AuthService;
+import com.flexpos.pos_dashboard_api.utils.SecurityUtil;
 import com.flexpos.pos_dashboard_api.utils.ValidationUtil;
 
 import jakarta.validation.Validator;
@@ -61,6 +60,7 @@ public class AuthServiceImplementation implements AuthService {
     user.setPhoneNumber(request.getPhoneNumber());
     user.setFullName(request.getFullName());
     user.setPassword(passwordEncoder.encode(request.getPassword()));
+    user.setStatus(UserStatus.ACTIVE);
     user.setCreatedAt(LocalDateTime.now());
     UserEntity savedUser = userRepository.save(user);
 
@@ -122,16 +122,8 @@ public class AuthServiceImplementation implements AuthService {
 
   @Transactional
   public WebResponse<String> logoutUser() {
-    UUID userId = (UUID) SecurityContextHolder
-        .getContext()
-        .getAuthentication()
-        .getPrincipal();
-
-    if (!userRepository.existsById(userId)) {
-      throw new NotFoundException("User not found!");
-    } 
-
-    authRepository.deleteByUserId(userId);
+    UserEntity user = SecurityUtil.getCurrentUser(userRepository);
+    authRepository.deleteByUserId(user.getId());
 
     return WebResponse
         .<String>builder()

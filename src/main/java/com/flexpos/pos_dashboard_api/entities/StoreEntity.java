@@ -1,28 +1,28 @@
 package com.flexpos.pos_dashboard_api.entities;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.flexpos.pos_dashboard_api.enums.UserStatus;
+import com.flexpos.pos_dashboard_api.enums.StoreStatus;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Getter;
 import lombok.Setter;
 
 @Getter
@@ -31,9 +31,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "users")
-public class UserEntity {
-
+@Table(name = "stores")
+public class StoreEntity {
+  
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id")
@@ -41,25 +41,16 @@ public class UserEntity {
 
   @Column(name = "photo_url")
   private String photoUrl;
+  
+  @Column(name = "code", nullable = false)
+  private String code;
 
-  @Column(name = "username", nullable = false)
-  private String username;
-
-  @Column(name = "email", nullable = false)
-  private String email;
-
-  @Column(name = "phone_number", nullable = false)
-  private String phoneNumber;
-
-  @Column(name = "full_name", nullable = false)
-  private String fullName;
-
-  @Column(name = "password", nullable = false)
-  private String password;
+  @Column(name = "name", nullable = false)
+  private String name;
 
   @Column(name = "status", nullable = false)
   @Enumerated(EnumType.STRING)
-  private UserStatus status;
+  private StoreStatus status;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -72,7 +63,8 @@ public class UserEntity {
   @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-  private List<RefreshTokenEntity> refreshTokens;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private UserEntity user;
 
 }
